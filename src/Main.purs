@@ -13,11 +13,10 @@ fillPoint ctx x y = fillRect ctx { x: toNumber x, y: toNumber y, w: 1.0, h: 1.0 
 drawLine :: forall e. Context2D -> String -> Int -> Int -> Int -> Int -> Eff ( canvas :: CANVAS | e ) Unit
 drawLine ctx color x0 y0 x1 y1 = do
   setFillStyle color ctx
-  forE 0 100 \i -> do
-    let t = (toNumber i) / 100.0
-    let x = (toNumber x0) * (1.0 - t) + (toNumber x1) * t
+  forE x0 x1 \x -> do
+    let t = toNumber (x - x0) / toNumber (x1 - x0)
     let y = (toNumber y0) * (1.0 - t) + (toNumber y1) * t
-    fillPoint ctx (floor x) (floor y)
+    fillPoint ctx x (floor y)
     pure unit
 
 clear :: forall e. Context2D -> Eff ( canvas :: CANVAS | e ) Context2D
