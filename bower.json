@@ -12,5 +12,7 @@
     "purescript-arrays": "^3.1.0",
     "purescript-integers": "^2.1.0"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "purescript-psci-support": "^2.0.0"
+  }
 }
