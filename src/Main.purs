@@ -36,9 +36,11 @@ main = do
     Just element -> do
                      ctx <- getContext2D element
                      translate { translateX: 0.0, translateY: 600.0 } ctx
-                     scale { scaleX: 1.0, scaleY: -1.0 } ctx
+                     scale { scaleX: 2.0, scaleY: -2.0 } ctx
                      clear ctx
-                     drawLine ctx "#ff0000" 0 0 100 100
+                     drawLine ctx "#ffffff" 13 20 80 40
+                     drawLine ctx "#ff0000" 20 13 40 80
+                     drawLine ctx "#ff0000" 80 40 13 20
                      transform transformIdentity ctx
                      pure unit
     Nothing -> log "sorry"
