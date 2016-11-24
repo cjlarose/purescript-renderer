@@ -3,6 +3,7 @@ module Main where
 import Prelude
 import Control.Monad.Eff (Eff, foreachE)
 import Control.Monad.Eff.Console (CONSOLE, log)
+import Math (abs)
 import Data.Array ((..))
 import Data.Int (toNumber, round)
 import Data.Maybe (Maybe(Just, Nothing))
@@ -13,15 +14,26 @@ newtype Point2d = Point2d { x :: Int, y :: Int }
 instance showPoint2d :: Show Point2d where
   show (Point2d p) = "(" <> (show p.x) <> "," <> (show p.y) <> ")"
 
+reflectInDiagonal :: Point2d -> Point2d
+reflectInDiagonal (Point2d p) = Point2d { x: p.y, y: p.x }
+
 fillPoint :: forall e. Context2D -> Int -> Int -> Eff ( canvas :: CANVAS | e ) Context2D
 fillPoint ctx x y = fillRect ctx { x: toNumber x, y: toNumber y, w: 1.0, h: 1.0 }
 
+genLineNonSteep :: Int -> Int -> Int -> Int -> Array Point2d
+genLineNonSteep x0 y0 x1 y1 = map f (x0..x1)
+  where f x = let t = toNumber (x - x0) / toNumber (x1 - x0)
+                  y = toNumber y0 * (1.0 - t) + toNumber y1 * t
+              in Point2d { x: x, y: round y }
+
 generateLine :: Point2d -> Point2d -> Array Point2d
-generateLine (Point2d p0) (Point2d p1) = map f (p0.x..p1.x)
+generateLine (Point2d p0) (Point2d p1) = points
   where
-    f x = let t = toNumber (x - p0.x) / toNumber (p1.x - p0.x)
-              y = toNumber p0.y * (1.0 - t) + toNumber p1.y * t
-          in Point2d { x: x, y: round y }
+    horizProj = abs <<< toNumber $ p1.x - p0.x
+    vertProj = abs <<< toNumber $ p1.y - p0.y
+    points = if horizProj >= vertProj
+             then genLineNonSteep p0.x p0.y p1.x p1.y
+             else map reflectInDiagonal $ genLineNonSteep p0.y p0.x p1.y p1.x
 
 drawLine :: forall e. Context2D -> String -> Int -> Int -> Int -> Int -> Eff ( canvas :: CANVAS | e ) Unit
 drawLine ctx color x0 y0 x1 y1 = do
