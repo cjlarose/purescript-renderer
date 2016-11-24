@@ -49,9 +49,14 @@ main = do
                      translate { translateX: 0.0, translateY: 600.0 } ctx
                      scale { scaleX: 2.0, scaleY: -2.0 } ctx
                      clear ctx
-                     drawLine ctx "#ffffff" 13 20 80 40
-                     drawLine ctx "#ff0000" 20 13 40 80
-                     drawLine ctx "#ff0000" 80 40 13 20
+                     drawLine ctx "#0000ff" 13 220 80 240
+                     drawLine ctx "#00ff00" 113 220 120 280
+                     drawLine ctx "#00ffff" 280 220 250 280
+                     drawLine ctx "#ff0000" 380 220 313 240
+                     drawLine ctx "#ff00ff" 80 140 13 120
+                     drawLine ctx "#ffff00" 120 180 113 120
+                     drawLine ctx "#ffffff" 250 180 280 120
+                     drawLine ctx "#cccccc" 313 140 380 120
                      transform transformIdentity ctx
                      pure unit
     Nothing -> log "sorry"
