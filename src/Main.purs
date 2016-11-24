@@ -69,6 +69,10 @@ main = do
                      drawLine ctx "#ffff00" 120 180 113 120
                      drawLine ctx "#ffffff" 250 180 280 120
                      drawLine ctx "#cccccc" 313 140 380 120
+                     drawLine ctx "#0000ff" 13 20 13 70
+                     drawLine ctx "#0000ff" 23 70 23 20
+                     drawLine ctx "#00ff00" 33 50 83 50
+                     drawLine ctx "#00ff00" 83 30 33 30
                      transform transformIdentity ctx
                      pure unit
     Nothing -> log "sorry"
