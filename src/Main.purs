@@ -3,21 +3,21 @@ module Main where
 import Prelude
 import Control.Monad.Eff (Eff, forE)
 import Control.Monad.Eff.Console (CONSOLE, log)
-import Data.Int (toNumber)
+import Data.Int (toNumber, floor)
 import Data.Maybe (Maybe(Just, Nothing))
 import Graphics.Canvas (getCanvasElementById, CANVAS, getContext2D, setFillStyle, fillRect, Context2D)
 
-fillPoint :: forall e. Context2D -> Number -> Number -> Eff ( canvas :: CANVAS | e ) Context2D
-fillPoint ctx x y = fillRect ctx { x: x, y: y, w: 1.0, h: 1.0 }
+fillPoint :: forall e. Context2D -> Int -> Int -> Eff ( canvas :: CANVAS | e ) Context2D
+fillPoint ctx x y = fillRect ctx { x: toNumber x, y: toNumber y, w: 1.0, h: 1.0 }
 
-drawLine :: forall e. Context2D -> String -> Number -> Number -> Number -> Number -> Eff ( canvas :: CANVAS | e ) Unit
+drawLine :: forall e. Context2D -> String -> Int -> Int -> Int -> Int -> Eff ( canvas :: CANVAS | e ) Unit
 drawLine ctx color x0 y0 x1 y1 = do
   setFillStyle color ctx
   forE 0 100 \i -> do
     let t = (toNumber i) / 100.0
-    let x = x0 * (1.0 - t) + x1 * t
-    let y = y0 * (1.0 - t) + y1 * t
-    fillPoint ctx x y
+    let x = (toNumber x0) * (1.0 - t) + (toNumber x1) * t
+    let y = (toNumber y0) * (1.0 - t) + (toNumber y1) * t
+    fillPoint ctx (floor x) (floor y)
     pure unit
 
 clear :: forall e. Context2D -> Eff ( canvas :: CANVAS | e ) Context2D
@@ -33,6 +33,6 @@ main = do
     Just element -> do
                      ctx <- getContext2D element
                      clear ctx
-                     drawLine ctx "#ff0000" 0.0 0.0 100.0 100.0
+                     drawLine ctx "#ff0000" 0 0 100 100
                      log "hello"
     Nothing -> log "sorry"
