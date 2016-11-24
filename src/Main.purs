@@ -1,22 +1,31 @@
 module Main where
 
 import Prelude
-import Control.Monad.Eff (Eff, forE)
+import Control.Monad.Eff (Eff, foreachE)
 import Control.Monad.Eff.Console (CONSOLE, log)
-import Data.Int (toNumber, floor)
+import Data.Array ((..))
+import Data.Int (toNumber, round)
 import Data.Maybe (Maybe(Just, Nothing))
 import Graphics.Canvas (getCanvasElementById, CANVAS, getContext2D, setFillStyle, fillRect, Context2D, scale, transform, Transform, translate)
+
+type Point2d = { x :: Int, y :: Int }
 
 fillPoint :: forall e. Context2D -> Int -> Int -> Eff ( canvas :: CANVAS | e ) Context2D
 fillPoint ctx x y = fillRect ctx { x: toNumber x, y: toNumber y, w: 1.0, h: 1.0 }
 
+generateLine :: Point2d -> Point2d -> Array Point2d
+generateLine p0 p1 = map f (p0.x..p1.x)
+  where
+    f x = let t = toNumber (x - p0.x) / toNumber (p1.x - p0.x)
+              y = toNumber p0.y * (1.0 - t) + toNumber p1.y * t
+          in { x: x, y: round y }
+
 drawLine :: forall e. Context2D -> String -> Int -> Int -> Int -> Int -> Eff ( canvas :: CANVAS | e ) Unit
 drawLine ctx color x0 y0 x1 y1 = do
   setFillStyle color ctx
-  forE x0 x1 \x -> do
-    let t = toNumber (x - x0) / toNumber (x1 - x0)
-    let y = (toNumber y0) * (1.0 - t) + (toNumber y1) * t
-    fillPoint ctx x (floor y)
+  let line = generateLine { x: x0, y: y0 } { x: x1, y: y1 }
+  foreachE line \p -> do
+    fillPoint ctx p.x p.y
     pure unit
 
 clear :: forall e. Context2D -> Eff ( canvas :: CANVAS | e ) Context2D
