@@ -58,25 +58,29 @@ main :: forall e. Eff (console :: CONSOLE, canvas :: CANVAS, dom :: DOM | e) Uni
 main = do
   canvasElement <- getCanvasElementById "canvas"
   headData <- getWireframeDataById "head-data"
-  log headData
-  case canvasElement of
-    Just element -> do
-                     ctx <- getContext2D element
-                     translate { translateX: 0.0, translateY: 600.0 } ctx
-                     scale { scaleX: 2.0, scaleY: -2.0 } ctx
-                     clear ctx
-                     drawLine ctx "#0000ff" 13 220 80 240
-                     drawLine ctx "#00ff00" 113 220 120 280
-                     drawLine ctx "#00ffff" 280 220 250 280
-                     drawLine ctx "#ff0000" 380 220 313 240
-                     drawLine ctx "#ff00ff" 80 140 13 120
-                     drawLine ctx "#ffff00" 120 180 113 120
-                     drawLine ctx "#ffffff" 250 180 280 120
-                     drawLine ctx "#cccccc" 313 140 380 120
-                     drawLine ctx "#0000ff" 13 20 13 70
-                     drawLine ctx "#0000ff" 23 70 23 20
-                     drawLine ctx "#00ff00" 33 50 83 50
-                     drawLine ctx "#00ff00" 83 30 33 30
-                     transform transformIdentity ctx
-                     pure unit
-    Nothing -> log "sorry"
+  case headData of
+    Nothing -> log "no wireframe data"
+    Just wireframeGetter -> do
+      wireframe <- wireframeGetter
+      log wireframe
+      case canvasElement of
+        Just element -> do
+                         ctx <- getContext2D element
+                         translate { translateX: 0.0, translateY: 600.0 } ctx
+                         scale { scaleX: 2.0, scaleY: -2.0 } ctx
+                         clear ctx
+                         drawLine ctx "#0000ff" 13 220 80 240
+                         drawLine ctx "#00ff00" 113 220 120 280
+                         drawLine ctx "#00ffff" 280 220 250 280
+                         drawLine ctx "#ff0000" 380 220 313 240
+                         drawLine ctx "#ff00ff" 80 140 13 120
+                         drawLine ctx "#ffff00" 120 180 113 120
+                         drawLine ctx "#ffffff" 250 180 280 120
+                         drawLine ctx "#cccccc" 313 140 380 120
+                         drawLine ctx "#0000ff" 13 20 13 70
+                         drawLine ctx "#0000ff" 23 70 23 20
+                         drawLine ctx "#00ff00" 33 50 83 50
+                         drawLine ctx "#00ff00" 83 30 33 30
+                         transform transformIdentity ctx
+                         pure unit
+        Nothing -> log "sorry"
