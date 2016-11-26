@@ -8,6 +8,8 @@ import Data.Array ((..))
 import Data.Int (toNumber, round)
 import Data.Maybe (Maybe(Just, Nothing))
 import Graphics.Canvas (getCanvasElementById, CANVAS, getContext2D, setFillStyle, fillRect, Context2D, scale, transform, Transform, translate)
+import DOM (DOM)
+import Wireframe (getWireframeDataById)
 
 newtype Point2d = Point2d { x :: Int, y :: Int }
 
@@ -52,9 +54,11 @@ transformIdentity :: Transform
 transformIdentity = { m11: 1.0, m21: 0.0, m31: 0.0,
                       m12: 0.0, m22: 1.0, m32: 0.0 }
 
-main :: forall e. Eff (console :: CONSOLE, canvas :: CANVAS | e) Unit
+main :: forall e. Eff (console :: CONSOLE, canvas :: CANVAS, dom :: DOM | e) Unit
 main = do
   canvasElement <- getCanvasElementById "canvas"
+  headData <- getWireframeDataById "head-data"
+  log headData
   case canvasElement of
     Just element -> do
                      ctx <- getContext2D element
