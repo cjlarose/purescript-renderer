@@ -38,6 +38,14 @@ isBlank = test r
   where
     r = unsafePartial fromRight $ regex "^\\s*$" noFlags
 
+vertex :: Model -> Int -> Vec3
+vertex (Model m) i = unsafePartial unsafeIndex m.vertices i
+
+faces :: Model -> Array Face
+faces (Model m) = m.faces
+
+dec x = x - 1
+
 parseWireframeData :: String -> Model
 parseWireframeData str = Model { vertices: vertices, faces: faces }
   where
@@ -59,7 +67,7 @@ parseWireframeData str = Model { vertices: vertices, faces: faces }
     faceData = filter (\l -> (unsafePartial unsafeIndex l 0) == "f") lines
 
     vertexIndex :: String -> Int
-    vertexIndex = floor <<< readInt 10 <<< unsafePartial fromJust <<< head <<< split (Pattern "/")
+    vertexIndex = dec <<< floor <<< readInt 10 <<< unsafePartial fromJust <<< head <<< split (Pattern "/")
 
     faces :: Array Face
     faces = faceData <#> (\arr -> Face { v0: vertexIndex $ unsafePartial unsafeIndex arr 1,

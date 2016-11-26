@@ -9,7 +9,8 @@ import Data.Int (toNumber, round)
 import Data.Maybe (Maybe(Just, Nothing))
 import Graphics.Canvas (getCanvasElementById, CANVAS, getContext2D, setFillStyle, fillRect, Context2D, scale, transform, Transform, translate)
 import DOM (DOM)
-import Wireframe (getWireframeDataById)
+import Wireframe (getWireframeDataById, parseWireframeData, Model(..), Face(..),
+                  Vec3(..), vertex, faces)
 
 newtype Point2d = Point2d { x :: Int, y :: Int }
 
@@ -33,9 +34,9 @@ generateLine (Point2d p0) (Point2d p1) = points
   where
     horizProj = abs <<< toNumber $ p1.x - p0.x
     vertProj = abs <<< toNumber $ p1.y - p0.y
-    points = if horizProj >= vertProj
-             then genLineNonSteep p0.x p0.y p1.x p1.y
-             else map reflectInDiagonal $ genLineNonSteep p0.y p0.x p1.y p1.x
+    points | horizProj == 0.0 && vertProj == 0.0 = []
+           | horizProj >= vertProj = genLineNonSteep p0.x p0.y p1.x p1.y
+           | otherwise = map reflectInDiagonal $ genLineNonSteep p0.y p0.x p1.y p1.x
 
 drawLine :: forall e. Context2D -> String -> Int -> Int -> Int -> Int -> Eff ( canvas :: CANVAS | e ) Unit
 drawLine ctx color x0 y0 x1 y1 = do
@@ -43,6 +44,20 @@ drawLine ctx color x0 y0 x1 y1 = do
   let line = generateLine (Point2d { x: x0, y: y0 }) (Point2d { x: x1, y: y1 })
   foreachE line \(Point2d p) -> do
     fillPoint ctx p.x p.y
+    pure unit
+
+drawWireframe ctx m = do
+  setFillStyle "#ff0000" ctx
+  foreachE (faces m) \(Face f) -> do
+    let v0 = vertex m f.v0
+        v1 = vertex m f.v1
+        v2 = vertex m f.v2
+        scaleCoord x = round $ (x + 1.0) * 100.0
+        draw (Vec3 a) (Vec3 b) = do
+          drawLine ctx "#ffffff" (scaleCoord a.x) (scaleCoord a.y) (scaleCoord b.x) (scaleCoord b.y)
+    draw v0 v1
+    draw v1 v2
+    draw v2 v0
     pure unit
 
 clear :: forall e. Context2D -> Eff ( canvas :: CANVAS | e ) Context2D
@@ -62,12 +77,13 @@ main = do
     Nothing -> log "no wireframe data"
     Just wireframeGetter -> do
       wireframe <- wireframeGetter
-      log wireframe
+      let wireframeModel = parseWireframeData wireframe
+      -- log wireframe
       case canvasElement of
         Just element -> do
                          ctx <- getContext2D element
                          translate { translateX: 0.0, translateY: 600.0 } ctx
-                         scale { scaleX: 2.0, scaleY: -2.0 } ctx
+                         scale { scaleX: 1.0, scaleY: -1.0 } ctx
                          clear ctx
                          drawLine ctx "#0000ff" 13 220 80 240
                          drawLine ctx "#00ff00" 113 220 120 280
@@ -81,6 +97,7 @@ main = do
                          drawLine ctx "#0000ff" 23 70 23 20
                          drawLine ctx "#00ff00" 33 50 83 50
                          drawLine ctx "#00ff00" 83 30 33 30
+                         drawWireframe ctx wireframeModel
                          transform transformIdentity ctx
                          pure unit
         Nothing -> log "sorry"
